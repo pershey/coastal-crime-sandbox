@@ -82,7 +82,7 @@ export function createSaveGame(game) {
     game.missions.offerNext();
     // Wake up at the garage rather than in the middle of whatever street the save was made on.
     const home = PLACES.garage;
-    game.player.placeAt(home.x, home.z + 3, 0);
+    game.player.placeAt(home.x - 12, home.z - 0.5, Math.PI / 2);
     game.city.daylight.setHour(data.hour ?? 14);
   }
 

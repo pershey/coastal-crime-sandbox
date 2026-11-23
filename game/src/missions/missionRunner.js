@@ -24,7 +24,7 @@ export function createMissionRunner(game) {
     const mission = STORY_MISSIONS[state.index];
     if (!mission) return;
     const place = missionPlace(mission);
-    state.contactMarker = game.markers.add({ x: place.x, z: place.z, color: CONTACT_COLOR, kind: 'contact', label: CAST[mission.contact].name, radius: 3 });
+    state.contactMarker = game.markers.add({ x: place.x, z: place.z, color: CONTACT_COLOR, kind: 'contact', label: CAST[mission.contact].name, radius: 5 });
   }
 
   function start(mission) {
@@ -75,7 +75,7 @@ export function createMissionRunner(game) {
     if (step.say) game.hud.say(step.say[0], step.say[1]);
     const where = step.place ? PLACES[step.place] : step.at;
 
-    if (step.type === 'goto' || step.type === 'deliver') objectiveMarker(active, where.x, where.z, step.radius ?? 5);
+    if (step.type === 'goto' || step.type === 'deliver') objectiveMarker(active, where.x, where.z, step.radius ?? 7);
     if (step.type === 'steal') {
       active.vehicle = spawnMissionVehicle(step, step.at, 'mission');
       objectiveMarker(active, step.at.x, step.at.z, 3.5);

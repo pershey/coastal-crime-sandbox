@@ -69,6 +69,19 @@ export function createGunmen(game) {
       gunman.pose = 'stand';
       return;
     }
+    // Officers who have lost the player head for where they were last seen, not where they are.
+    if (police && !sees && !game.wanted.state.seen) {
+      const lastX = game.wanted.state.lastSeenX, lastZ = game.wanted.state.lastSeenZ;
+      if (distance(gunman.x, gunman.z, lastX, lastZ) > 4 && !gunman.hold) {
+        gunman.heading = dampAngle(gunman.heading, headingTo(gunman.x, gunman.z, lastX, lastZ), 9, dt);
+        gunman.x += Math.sin(gunman.heading) * spec.speed * 0.7 * dt;
+        gunman.z += Math.cos(gunman.heading) * spec.speed * 0.7 * dt;
+        game.city.collision.resolveCircle(gunman, gunman.radius);
+        gunman.stride += spec.speed * 0.7 * dt * 3;
+        gunman.pose = 'walk';
+      } else gunman.pose = 'stand';
+      return;
+    }
     // At one star an officer walks up and makes the arrest rather than opening fire.
     const arresting = police && stars <= 1 && !game.wanted.state.shotsFired;
     const preferred = arresting ? 1.4 : gunman.hold ? spec.range * 0.8 : 13;

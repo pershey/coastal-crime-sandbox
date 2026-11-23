@@ -52,7 +52,16 @@ function stageChase(game) {
   game.police.dispatch('cruiser', { x: car.x + 28, z: BOULEVARD + 0.4, heading: west, speed: 38 });
   game.police.dispatch('tactical', { x: car.x + 37, z: BOULEVARD - 2.6, heading: west, speed: 36 });
   game.police.buildRoadblock(car.x + 84, BOULEVARD, true);
+  // One cruiser has already lost the argument: it goes up in flames behind the pack.
+  const loser = game.fleet.spawn('cruiser', car.x + 50, BOULEVARD + 4.6, west + 0.7, { role: 'police' });
+  game.fleet.damage(loser, 999, true);
+  loser.fuse = 0.58;
   game.helicopter.placeOnStation(Math.PI / 2 - 0.7);
+  game.helicopter.state.cooldown = 0.71;
+  // Mara fires an SMG back at them from the driver's seat.
+  game.weapons.give('smg', 180);
+  game.weapons.select('smg');
+  game.input.state.fire = true;
   game.autopilot = { throttle: 0.35, steer: 0, handbrake: false };
   midMission(game, 'dita', 'Five stars?! Lose them before you come anywhere near my lock-up!');
   game.cameraRig.state.zoom = 1.0;

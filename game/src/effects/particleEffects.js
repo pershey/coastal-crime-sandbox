@@ -7,9 +7,10 @@ const CAPACITY = 500;
 
 export function createParticleEffects(game) {
   const solid = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.5, 0), new THREE.MeshLambertMaterial(), CAPACITY);
-  const glowMaterial = new THREE.MeshBasicMaterial({ toneMapped: false, transparent: true, opacity: 0.92, blending: THREE.AdditiveBlending, depthWrite: false });
+  // Flames, flashes and tracers are unlit and drawn at full brightness, day or night.
+  const glowMaterial = new THREE.MeshBasicMaterial({ toneMapped: false });
   const glowing = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.5, 0), glowMaterial, CAPACITY);
-  const beams = new THREE.InstancedMesh(new THREE.BoxGeometry(0.05, 0.05, 1), glowMaterial, 120);
+  const beams = new THREE.InstancedMesh(new THREE.BoxGeometry(0.07, 0.07, 1), glowMaterial, 120);
   for (const mesh of [solid, glowing, beams]) {
     mesh.frustumCulled = false;
     mesh.count = 0;
@@ -43,19 +44,19 @@ export function createParticleEffects(game) {
   }
 
   function muzzleFlash(x, y, z) {
-    add(true, x, y, z, 0, 0, 0, 0.06, 0.55, 2, 0xfff1a8);
+    add(true, x, y, z, 0, 0, 0, 0.06, 0.4, 2, 0xffd447);
   }
 
   /** A streak from one point to another that lasts a few frames. */
   function tracer(x0, y0, z0, x1, y1, z1, hex = 0xfff3b0) {
     if (tracers.length >= 118) tracers.shift();
-    tracers.push({ x0, y0, z0, x1, y1, z1, life: 0.07, hex });
+    tracers.push({ x0, y0, z0, x1, y1, z1, life: 0.09, hex });
   }
 
   function explosion(x, z) {
     const r = game.random;
-    for (let k = 0; k < 16; k += 1) {
-      add(true, x + r.range(-1.5, 1.5), r.range(0.5, 2.5), z + r.range(-1.5, 1.5), r.range(-7, 7), r.range(2, 11), r.range(-7, 7), r.range(0.35, 0.8), r.range(1.6, 3.4), 2.5, r.pick([0xff5400, 0xff9e00, 0xffd000, 0xffffff]));
+    for (let k = 0; k < 22; k += 1) {
+      add(true, x + r.range(-1.8, 1.8), r.range(0.5, 3), z + r.range(-1.8, 1.8), r.range(-6, 6), r.range(2, 10), r.range(-6, 6), r.range(0.45, 0.95), r.range(2, 4.2), 3, r.pick([0xff5400, 0xff9e00, 0xffd000, 0xfff3b0]));
     }
     for (let k = 0; k < 14; k += 1) {
       add(false, x + r.range(-2, 2), r.range(1, 3), z + r.range(-2, 2), r.range(-3, 3), r.range(2.5, 7), r.range(-3, 3), r.range(1.6, 3), r.range(1.4, 2.6), 1.6, r.pick([0x1f1f1f, 0x333333, 0x4a4a4a]));

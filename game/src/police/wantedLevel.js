@@ -30,7 +30,7 @@ export function createWantedLevel(game) {
     if (stars === state.stars) return;
     const before = state.stars;
     state.stars = stars;
-    state.evadeNeeded = 7 + stars * 4.5;
+    state.evadeNeeded = 10 + stars * 5;
     game.events.emit('wantedChanged', { stars, before });
   }
 

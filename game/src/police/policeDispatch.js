@@ -33,7 +33,7 @@ export function createPoliceDispatch(game) {
     for (let attempt = 0; attempt < 16; attempt += 1) {
       const node = game.random.pick(game.city.roads.nodes);
       const d = distance(node.x, node.z, p.x, p.z);
-      if (d < 95 || d > 190) continue;
+      if (d < 80 || d > 160) continue;
       if (game.fleet.nearest(node.x, node.z, 9)) continue;
       const route = game.city.roads.findRoute(node, game.city.roads.nearestNode(p.x, p.z));
       const next = route[1] ?? node.links[0];
@@ -86,8 +86,19 @@ export function createPoliceDispatch(game) {
     const vehicle = unit.vehicle;
     const controls = vehicle.controls;
     const player = game.player.state;
-    const target = game.player.position();
-    const lead = player.vehicle ? 0.5 : 0;
+    const wanted = game.wanted.state;
+    // While the player is in sight, units converge on them; once sight is lost they comb
+    // the streets around the place the player was last seen.
+    if (!wanted.seen) {
+      unit.searchTimer = (unit.searchTimer ?? 0) - dt;
+      if (unit.searchTimer <= 0) {
+        unit.searchTimer = game.random.range(4, 7);
+        unit.searchX = wanted.lastSeenX + game.random.range(-70, 70);
+        unit.searchZ = wanted.lastSeenZ + game.random.range(-70, 70);
+      }
+    }
+    const target = wanted.seen ? game.player.position() : { x: unit.searchX ?? wanted.lastSeenX, z: unit.searchZ ?? wanted.lastSeenZ };
+    const lead = wanted.seen && player.vehicle ? 0.5 : 0;
     const tx = target.x + (player.vehicle ? player.vehicle.vx * lead : 0), tz = target.z + (player.vehicle ? player.vehicle.vz * lead : 0);
     const range = distance(vehicle.x, vehicle.z, target.x, target.z);
     const roads = game.city.roads;
@@ -126,10 +137,11 @@ export function createPoliceDispatch(game) {
     const turn = angleDelta(vehicle.heading, headingTo(vehicle.x, vehicle.z, unit.aimX, unit.aimZ));
     controls.steer = clamp(turn * 2.4, -1, 1);
     controls.handbrake = Math.abs(turn) > 1.3 && vehicle.speed > 14;
-    let throttle = 1;
+    let throttle = wanted.seen ? 1 : 0.55;
     if (Math.abs(turn) > 0.6 && vehicle.speed > 13) throttle = -0.6;
+    if (!wanted.seen && vehicle.speed > 17) throttle = 0;
     // Someone on foot is arrested or shot at, not run down: pull up and get out.
-    if (!player.vehicle && range < 15 + (vehicle.speed * vehicle.speed) / 34) {
+    if (wanted.seen && !player.vehicle && range < 15 + (vehicle.speed * vehicle.speed) / 34) {
       throttle = vehicle.speed > 1 ? -1 : 0;
       controls.handbrake = true;
       if (Math.abs(vehicle.speed) < 2) dismount(unit);
@@ -273,6 +285,11 @@ export function createPoliceDispatch(game) {
       if (roadblocks.length < ROADBLOCKS_BY_STARS[stars] && placeRoadblock()) roadblockTimer = 12;
     }
   }
+
+  // The first unit is sent the moment a crime is called in.
+  game.events.on('wantedChanged', ({ before }) => {
+    if (before === 0) spawnTimer = 0.3;
+  });
 
   /** True while any officer, crewed unit or the helicopter has eyes on the player. */
   function canSeePlayer() {

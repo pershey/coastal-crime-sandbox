@@ -42,7 +42,12 @@ function buildBodyGeometry(spec, paint) {
     b.box(0, floor + bodyH * 0.3, 0, W + 0.04, bodyH * 0.14, L * 0.7, second);
   } else {
     const bodyH = style === 'sports' ? 0.5 : style === 'pickup' ? 0.75 : 0.58;
-    b.prism(0, floor, 0, W, bodyH, L, paint, { topX: W * 0.95, topZ: L * 0.97 });
+    b.prism(0, floor, 0, W, bodyH, L, paint, { topX: W * 0.94, topZ: L * 0.93, shiftZ: -L * 0.015 });
+    // Dark sills, a grille and number plates break up the slab sides.
+    b.box(0, floor - 0.04, 0, W + 0.03, 0.14, L * 0.6, TRIM);
+    b.box(0, floor + 0.1, L / 2 - 0.02, W * 0.46, bodyH * 0.42, 0.08, TRIM);
+    b.box(0, floor + 0.04, L / 2 + 0.07, 0.5, 0.13, 0.04, 0xf2f2f2);
+    b.box(0, floor + 0.2, -L / 2 - 0.03, 0.5, 0.13, 0.04, 0xf2f2f2);
     const cabinH = H - floor - bodyH;
     const plan = {
       compact: { len: 0.56, at: -0.06, top: 0.72 },
@@ -59,6 +64,9 @@ function buildBodyGeometry(spec, paint) {
     } else {
       b.prism(0, floor + bodyH, cabinZ, W * 0.9, cabinH, cabinL, GLASS, { topX: W * 0.78, topZ: cabinL * plan.top, shiftZ: -cabinL * 0.04, noTop: true });
       b.box(0, floor + bodyH + cabinH, cabinZ - cabinL * 0.04, W * 0.79, 0.05, cabinL * plan.top + 0.02, paint);
+      // A painted pillar between the front and rear side windows, and door mirrors.
+      b.prism(0, floor + bodyH, cabinZ - cabinL * 0.03, W * 0.91, cabinH, 0.1, paint, { topX: W * 0.79, topZ: 0.1, noTop: true });
+      for (const side of [-1, 1]) b.box(side * (W * 0.46 + 0.08), floor + bodyH, cabinZ + cabinL * 0.36, 0.16, 0.12, 0.1, paint);
     }
     if (style === 'pickup') {
       const bedL = L * 0.42, bedZ = -L * 0.27;

@@ -6,6 +6,7 @@ import { damp, distance } from '../core/mathUtil.js';
 
 const CRUISE_HEIGHT = 24;
 const ORBIT_RADIUS = 34;
+const TOP_SPEED = 27;
 
 function buildHelicopterMesh(material) {
   const b = new MeshBuilder();
@@ -63,10 +64,14 @@ export function createPoliceHelicopter(game) {
     state.spotZ = p.z;
   }
 
+  /** The crew sees the player when close enough and no tall building is in the way. */
   function seesPlayer() {
     if (!state.active) return false;
     const p = game.player.position();
-    return distance(state.x, state.z, p.x, p.z) < 80;
+    if (distance(state.x, state.z, p.x, p.z) > 70) return false;
+    // On foot, pressing up against a building hides you from the searchlight.
+    if (!game.player.state.vehicle && game.city.collision.isBlocked(p.x, p.z, 3.2)) return false;
+    return game.city.collision.hasLineOfSight(state.x, state.z, p.x, p.z, 16);
   }
 
   function update(dt) {
@@ -87,11 +92,14 @@ export function createPoliceHelicopter(game) {
       pool.visible = false;
       return;
     }
+    // Circle the player while anyone has eyes on them; otherwise sweep the place they were last seen.
+    const wanted = game.wanted.state;
+    const focus = wanted.seen ? p : { x: wanted.lastSeenX, z: wanted.lastSeenZ };
     let goalX, goalZ, goalY;
     if (stars >= 3) {
       state.orbit += dt * 0.35;
-      goalX = p.x + Math.sin(state.orbit) * ORBIT_RADIUS;
-      goalZ = p.z + Math.cos(state.orbit) * ORBIT_RADIUS;
+      goalX = focus.x + Math.sin(state.orbit) * ORBIT_RADIUS;
+      goalZ = focus.z + Math.cos(state.orbit) * ORBIT_RADIUS;
       goalY = CRUISE_HEIGHT;
     } else {
       goalX = state.x - 60;
@@ -99,12 +107,19 @@ export function createPoliceHelicopter(game) {
       goalY = 160;
       if (state.y > 140) state.active = false;
     }
+    // It eases toward its station but tops out at TOP_SPEED, so a fast car can outrun it.
     const beforeX = state.x, beforeZ = state.z;
-    state.x = damp(state.x, goalX, 1.1, dt);
-    state.z = damp(state.z, goalZ, 1.1, dt);
+    let moveX = damp(state.x, goalX, 1.1, dt) - state.x, moveZ = damp(state.z, goalZ, 1.1, dt) - state.z;
+    const moved = Math.hypot(moveX, moveZ);
+    if (moved > TOP_SPEED * dt) {
+      moveX *= (TOP_SPEED * dt) / moved;
+      moveZ *= (TOP_SPEED * dt) / moved;
+    }
+    state.x += moveX;
+    state.z += moveZ;
     state.y = damp(state.y, goalY, 0.9, dt);
     const vx = (state.x - beforeX) / dt, vz = (state.z - beforeZ) / dt;
-    state.heading = Math.atan2(p.x - state.x, p.z - state.z);
+    state.heading = Math.atan2(focus.x - state.x, focus.z - state.z);
     group.visible = true;
     group.position.set(state.x, state.y, state.z);
     group.rotation.set(Math.min(0.3, Math.hypot(vx, vz) * 0.012), state.heading, 0);
@@ -112,8 +127,9 @@ export function createPoliceHelicopter(game) {
     tailRotor.rotation.x += dt * 50;
 
     const searching = stars >= 3;
-    state.spotX = damp(state.spotX, p.x, 3.5, dt);
-    state.spotZ = damp(state.spotZ, p.z, 3.5, dt);
+    const sweep = wanted.seen ? 0 : 14;
+    state.spotX = damp(state.spotX, focus.x + Math.sin(game.time * 0.9) * sweep, 3.5, dt);
+    state.spotZ = damp(state.spotZ, focus.z + Math.cos(game.time * 0.7) * sweep, 3.5, dt);
     beam.visible = searching;
     pool.visible = searching;
     if (searching) {

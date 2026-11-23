@@ -95,10 +95,13 @@ game.startMenu = createStartMenu(game, { newGame, loadGame });
 game.pauseMap = createPauseMap(game, { resume, quitToTitle });
 window.__game = game;
 
+/** Fit the canvas to the window and scale the HUD and menus, which are laid out for 1280 x 800. */
 function resize() {
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+  const scale = Math.max(0.55, Math.min(window.innerWidth / 1280, window.innerHeight / 800, 1.6));
+  for (const id of ['hud', 'start-menu', 'pause-map', 'shop-panel']) document.getElementById(id).style.zoom = String(scale);
 }
 window.addEventListener('resize', resize);
 resize();
@@ -107,7 +110,7 @@ resize();
 function resetWorld() {
   const home = PLACES.garage;
   game.wanted.clear();
-  game.player.placeAt(home.x - 10, home.z - 0.5, Math.PI / 2);
+  game.player.placeAt(home.x - 12, home.z - 0.5, Math.PI / 2);
   game.player.state.health = game.player.state.maxHealth;
   game.cameraRig.snap(Math.PI / 2);
 }

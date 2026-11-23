@@ -117,6 +117,15 @@ export function createVehicleFleet(game) {
         vehicle.fuse -= dt;
         if (vehicle.fuse <= 0) explode(vehicle);
       }
+      // Tyre smoke off the rear wheels in a drift or a hard launch.
+      if (vehicle.slip > 4.5 && Math.abs(vehicle.speed) > 5 && game.effects) {
+        vehicle.skidTimer = (vehicle.skidTimer ?? 0) - dt;
+        if (vehicle.skidTimer <= 0) {
+          vehicle.skidTimer = 0.04;
+          const back = vehicle.spec.length * 0.32, side = game.random.sign() * vehicle.spec.width * 0.42;
+          game.effects.dust(vehicle.x - Math.sin(vehicle.heading) * back + Math.cos(vehicle.heading) * side, 0.3, vehicle.z - Math.cos(vehicle.heading) * back - Math.sin(vehicle.heading) * side, 0xe8e8e8);
+        }
+      }
       if (vehicle.health < vehicle.spec.health * 0.4 || vehicle.wrecked) {
         vehicle.smokeTimer -= dt;
         if (vehicle.smokeTimer <= 0) {
