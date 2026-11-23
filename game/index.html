@@ -3,17 +3,85 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Block Dodger</title>
-<style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #11141b; }
-  #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
-  /* Read aloud, never shown: the status line screen readers announce. */
-  #status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-</style>
+<title>Tamarind Coast - open-world crime game</title>
+<link rel="stylesheet" href="./styles/hud.css">
+<link rel="stylesheet" href="./styles/menus.css">
 </head>
 <body>
-<canvas id="game" aria-label="Block Dodger: move the paddle left and right to dodge falling blocks and catch coins"></canvas>
-<p id="status" role="status" aria-live="polite"></p>
+<canvas id="city-view" aria-label="Tamarind Coast: an open-world crime game. Explore the city on foot and by car."></canvas>
+
+<div id="hud" hidden>
+  <div id="minimap-panel">
+    <canvas id="minimap" width="236" height="236"></canvas>
+    <div id="district-name"></div>
+    <div id="city-clock"></div>
+  </div>
+  <div id="health-armor">
+    <div class="meter health"><i id="health-bar"></i><span>HEALTH</span></div>
+    <div class="meter armor"><i id="armor-bar"></i><span>ARMOR</span></div>
+  </div>
+  <div id="status-panel">
+    <div id="wanted-stars" aria-label="Wanted level"></div>
+    <div id="cash">$0</div>
+    <div id="reputation-rank"></div>
+    <div id="weapon-slot"><b id="weapon-name"></b><span id="weapon-ammo"></span></div>
+    <div id="police-dispatch"></div>
+  </div>
+  <div id="mission-objective">
+    <div id="mission-title"></div>
+    <div id="objective-text"></div>
+    <div id="mission-timer"></div>
+  </div>
+  <div id="dialogue-box">
+    <canvas id="dialogue-portrait" width="96" height="96"></canvas>
+    <div><b id="dialogue-speaker"></b><p id="dialogue-line"></p></div>
+  </div>
+  <div id="vehicle-panel">
+    <div id="radio-station"></div>
+    <div id="vehicle-name"></div>
+    <div id="speedometer"><b id="speed-value">0</b><span>MPH</span></div>
+    <div class="meter damage"><i id="vehicle-damage"></i></div>
+  </div>
+  <div id="action-prompt"></div>
+  <div id="crime-ticker"></div>
+  <div id="crosshair"></div>
+  <div id="big-message"><b id="big-message-title"></b><span id="big-message-detail"></span></div>
+  <div id="damage-flash"></div>
+</div>
+
+<div id="start-menu" class="screen" hidden>
+  <div id="game-logo"><span>TAMARIND</span><b>COAST</b><em>an open-world crime story</em></div>
+  <nav id="main-menu-buttons">
+    <button id="button-new-game">NEW GAME</button>
+    <button id="button-continue">CONTINUE</button>
+    <button id="button-controls">CONTROLS</button>
+  </nav>
+  <div id="save-slots"></div>
+  <div id="story-so-far"></div>
+  <div id="controls-help" hidden></div>
+</div>
+
+<div id="pause-map" class="screen" hidden>
+  <h1>TAMARIND COAST</h1>
+  <canvas id="city-map" width="760" height="640"></canvas>
+  <aside>
+    <div id="map-legend"></div>
+    <div id="mission-list"></div>
+    <div id="player-stats"></div>
+    <nav id="pause-buttons">
+      <button id="button-resume">RESUME</button>
+      <button id="button-save">SAVE GAME</button>
+      <button id="button-quit">QUIT TO TITLE</button>
+    </nav>
+  </aside>
+</div>
+
+<div id="shop-panel" class="screen" hidden>
+  <h1 id="shop-title"></h1>
+  <div id="shop-items"></div>
+  <p id="shop-hint">Press a number to buy. Walk away to leave.</p>
+</div>
+
 <script type="module" src="./src/main.js"></script>
 </body>
 </html>

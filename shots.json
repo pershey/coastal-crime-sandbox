@@ -1,5 +1,6 @@
 [
-  { "name": "1-start.jpg", "query": "?shot=start&seed=1" },
-  { "name": "2-play.jpg", "query": "?shot=play&seed=1" },
-  { "name": "3-end.jpg", "query": "?shot=end&seed=1" }
+  { "name": "1-boulevard-police-chase.jpg", "query": "?shot=chase&seed=7" },
+  { "name": "2-market-shootout-on-foot.jpg", "query": "?shot=shootout&seed=7" },
+  { "name": "3-night-street-race.jpg", "query": "?shot=night&seed=7" },
+  { "name": "4-title-and-save-slots.jpg", "query": "?shot=title&seed=7" }
 ]

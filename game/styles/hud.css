@@ -1,0 +1,75 @@
+/* In-game HUD: minimap, wanted stars, cash, weapon, mission objective, dialogue, speedometer. */
+html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1020; user-select: none; }
+body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #fff; }
+#city-view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+#hud { position: fixed; inset: 0; pointer-events: none; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.75), 0 0 8px rgba(0, 0, 0, 0.5); }
+#hud[hidden] { display: none; }
+.hud-font, #wanted-stars, #cash, #mission-title, #speedometer, #big-message, #district-name, #weapon-slot, #vehicle-name { font-family: Impact, "Arial Narrow Bold", "Haettenschweiler", sans-serif; letter-spacing: 0.04em; }
+
+/* Minimap, top left */
+#minimap-panel { position: absolute; left: 22px; top: 20px; width: 236px; }
+#minimap { width: 236px; height: 236px; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.55), 0 8px 22px rgba(0, 0, 0, 0.5); background: #1b2a3a; box-sizing: border-box; }
+#district-name { margin-top: 8px; font-size: 30px; line-height: 1; color: #ffe14f; text-align: center; white-space: nowrap; }
+#city-clock { font-size: 17px; font-weight: 700; text-align: center; opacity: 0.95; }
+
+/* Health and armour, under the minimap */
+#health-armor { position: absolute; left: 22px; top: 326px; width: 236px; display: grid; gap: 6px; }
+.meter { position: relative; height: 20px; background: rgba(0, 0, 0, 0.6); border: 2px solid rgba(255, 255, 255, 0.85); border-radius: 4px; overflow: hidden; }
+.meter i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; }
+.meter span { position: absolute; left: 8px; top: 0; font-size: 13px; font-weight: 800; line-height: 20px; letter-spacing: 0.08em; }
+.meter.health i { background: linear-gradient(#5cf07a, #1faa3f); }
+.meter.armor i { background: linear-gradient(#6fd0ff, #1f78d0); }
+.meter.damage i { background: linear-gradient(#ffd84a, #ff8a1e); }
+
+/* Wanted stars, cash, weapon and police response, top right */
+#status-panel { position: absolute; right: 22px; top: 16px; display: grid; justify-items: end; gap: 4px; }
+#wanted-stars { padding: 0 10px 4px; font-size: 54px; line-height: 1; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.3); background: rgba(0, 0, 0, 0.5); border-radius: 6px; }
+#wanted-stars .lit { color: #ffd21f; text-shadow: 0 0 14px rgba(255, 190, 0, 0.9), 0 3px 0 #7a4b00; }
+#wanted-stars.searching .lit { animation: star-blink 0.7s steps(2) infinite; }
+@keyframes star-blink { 50% { color: #fff; } }
+#cash { font-size: 44px; line-height: 1; color: #6dff8a; }
+#reputation-rank { font-size: 17px; font-weight: 800; letter-spacing: 0.06em; color: #ffd9f0; }
+#weapon-slot { display: flex; gap: 12px; align-items: baseline; padding: 4px 14px; font-size: 28px; background: rgba(0, 0, 0, 0.55); border-right: 6px solid #ff4fa3; border-radius: 4px; }
+#weapon-ammo { font-size: 24px; color: #ffe14f; }
+#police-dispatch { margin-top: 4px; padding: 6px 12px; min-width: 250px; font-size: 18px; font-weight: 800; line-height: 1.35; text-align: right; background: rgba(10, 20, 60, 0.72); border-right: 6px solid #3d8bff; border-radius: 4px; }
+#police-dispatch:empty { display: none; }
+#police-dispatch h4 { margin: 0; font-size: 15px; letter-spacing: 0.12em; color: #8fc0ff; }
+#police-dispatch .alert { color: #ff6b6b; }
+
+/* Mission objective, top centre */
+#mission-objective { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); width: 560px; text-align: center; }
+#mission-title { font-size: 30px; line-height: 1.05; color: #ff8ad0; }
+#objective-text { display: inline-block; margin-top: 4px; padding: 5px 16px; font-size: 23px; font-weight: 800; background: rgba(0, 0, 0, 0.6); border-bottom: 4px solid #ffe14f; border-radius: 4px; }
+#objective-text:empty { display: none; }
+#mission-timer { margin-top: 4px; font-size: 30px; font-weight: 800; color: #ffe14f; }
+
+/* Dialogue, bottom left */
+#dialogue-box { position: absolute; left: 22px; bottom: 22px; width: 520px; display: flex; gap: 14px; align-items: center; padding: 12px 16px 12px 12px; background: rgba(8, 10, 24, 0.78); border-left: 6px solid #33e1ff; border-radius: 6px; }
+#dialogue-box.hidden { display: none; }
+#dialogue-portrait { width: 96px; height: 96px; border-radius: 6px; border: 3px solid #fff; flex: none; }
+#dialogue-speaker { font-size: 20px; letter-spacing: 0.08em; color: #33e1ff; }
+#dialogue-line { margin: 4px 0 0; font-size: 21px; font-weight: 600; line-height: 1.25; }
+
+/* Speedometer and radio, bottom right */
+#vehicle-panel { position: absolute; right: 22px; bottom: 22px; width: 300px; display: grid; justify-items: end; gap: 4px; }
+#vehicle-panel.hidden { display: none; }
+#radio-station { padding: 4px 12px; font-size: 18px; font-weight: 800; background: rgba(0, 0, 0, 0.55); border-right: 6px solid #c78bff; border-radius: 4px; }
+#vehicle-name { font-size: 28px; color: #fff; }
+#speedometer { font-size: 78px; line-height: 0.9; color: #fff; }
+#speedometer span { margin-left: 8px; font-size: 26px; color: #ffe14f; }
+#vehicle-panel .meter { width: 240px; height: 14px; }
+
+/* Prompts, crime reports and messages */
+#action-prompt { position: absolute; left: 50%; bottom: 150px; transform: translateX(-50%); padding: 8px 18px; font-size: 22px; font-weight: 800; background: rgba(0, 0, 0, 0.65); border-radius: 6px; white-space: nowrap; }
+#action-prompt:empty { display: none; }
+#action-prompt kbd { display: inline-block; margin-right: 8px; padding: 0 9px; font: inherit; color: #111; background: #ffe14f; border-radius: 4px; text-shadow: none; }
+#crime-ticker { position: absolute; left: 50%; top: 112px; transform: translateX(-50%); padding: 2px 14px; font-size: 22px; font-weight: 800; letter-spacing: 0.06em; color: #fff; background: rgba(200, 20, 30, 0.82); border-radius: 4px; white-space: nowrap; }
+#crime-ticker:empty { display: none; }
+#crosshair { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border: 3px solid rgba(255, 255, 255, 0.9); border-radius: 50%; box-sizing: border-box; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5); }
+#crosshair::after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px; background: #ff4f4f; border-radius: 50%; }
+#crosshair.hidden { display: none; }
+#big-message { position: absolute; left: 0; right: 0; top: 30%; display: grid; justify-items: center; opacity: 0; transition: opacity 0.35s; }
+#big-message.visible { opacity: 1; }
+#big-message-title { font-size: 108px; line-height: 1; font-weight: 400; color: #ffe14f; text-shadow: 0 5px 0 #000, 0 0 30px rgba(0, 0, 0, 0.7); }
+#big-message-detail { margin-top: 6px; font-size: 34px; }
+#damage-flash { position: absolute; inset: 0; background: radial-gradient(transparent 55%, rgba(255, 0, 0, 0.55)); opacity: 0; }
