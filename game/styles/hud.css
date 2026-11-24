@@ -31,6 +31,10 @@ body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #fff
 #reputation-rank { font-size: 17px; font-weight: 800; letter-spacing: 0.06em; color: #ffd9f0; }
 #weapon-slot { display: flex; gap: 12px; align-items: baseline; padding: 4px 14px; font-size: 28px; background: rgba(0, 0, 0, 0.55); border-right: 6px solid #ff4fa3; border-radius: 4px; }
 #weapon-ammo { font-size: 24px; color: #ffe14f; }
+#weapon-rack { display: flex; gap: 5px; }
+#weapon-rack span { padding: 2px 9px; font-size: 16px; font-weight: 800; letter-spacing: 0.04em; color: #d5dbea; background: rgba(0, 0, 0, 0.6); border-bottom: 3px solid rgba(255, 255, 255, 0.25); border-radius: 4px; }
+#weapon-rack span.held { color: #15171a; background: #ffe14f; border-bottom-color: #ff4fa3; }
+#weapon-rack i { margin-right: 6px; font-style: normal; opacity: 0.65; }
 #police-dispatch { margin-top: 4px; padding: 6px 12px; min-width: 250px; font-size: 18px; font-weight: 800; line-height: 1.35; text-align: right; background: rgba(10, 20, 60, 0.72); border-right: 6px solid #3d8bff; border-radius: 4px; }
 #police-dispatch:empty { display: none; }
 #police-dispatch h4 { margin: 0; font-size: 15px; letter-spacing: 0.12em; color: #8fc0ff; }

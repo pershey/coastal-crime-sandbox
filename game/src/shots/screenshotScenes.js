@@ -30,7 +30,8 @@ function midMission(game, speaker, line) {
 /** Cover: five stars on Sunrow Boulevard in a stolen Kestrel GT, mid-way through "Hot Property". */
 function stageChase(game) {
   equip(game, 48250, 300, 1);
-  game.city.daylight.setHour(16.4);
+  // Mid-afternoon: the sun stands high enough to light the boulevard between the palm shadows.
+  game.city.daylight.setHour(15.1);
   game.player.state.health = 82;
   game.player.state.armor = 64;
   game.weapons.select('pistol');
@@ -47,25 +48,28 @@ function stageChase(game) {
   game.wanted.setStars(5, 120);
   const west = -Math.PI / 2;
   game.police.dispatch('cruiser', { x: car.x + 8, z: BOULEVARD - 2.4, heading: west, speed: 38 });
-  game.police.dispatch('cruiser', { x: car.x + 14, z: BOULEVARD + 4.2, heading: west, speed: 38 });
-  game.police.dispatch('cruiser', { x: car.x + 21, z: BOULEVARD - 5, heading: west, speed: 38 });
-  game.police.dispatch('cruiser', { x: car.x + 28, z: BOULEVARD + 0.4, heading: west, speed: 38 });
+  game.police.dispatch('cruiser', { x: car.x + 12, z: BOULEVARD + 6.1, heading: west, speed: 38 });
+  game.police.dispatch('cruiser', { x: car.x + 19, z: BOULEVARD + 0.7, heading: west, speed: 38 });
+  game.police.dispatch('cruiser', { x: car.x + 27, z: BOULEVARD - 4.4, heading: west, speed: 38 });
   game.police.dispatch('tactical', { x: car.x + 37, z: BOULEVARD - 2.6, heading: west, speed: 36 });
   game.police.buildRoadblock(car.x + 84, BOULEVARD, true);
   // One cruiser has already lost the argument: it goes up in flames behind the pack.
   const loser = game.fleet.spawn('cruiser', car.x + 50, BOULEVARD + 4.6, west + 0.7, { role: 'police' });
   game.fleet.damage(loser, 999, true);
   loser.fuse = 0.58;
-  game.helicopter.placeOnStation(Math.PI / 2 - 0.7);
+  // Air One trails the chase low over the boulevard, searchlight and door gun on the Kestrel.
+  game.helicopter.placeOnStation(1.36, 41, 14);
   game.helicopter.state.cooldown = 0.71;
+  // A cab on the far side of the boulevard has pulled over to let the chase through.
+  game.fleet.spawn('cabana', car.x - 19, BOULEVARD - 5.2, Math.PI / 2 + 0.12, {});
   // Mara fires an SMG back at them from the driver's seat.
   game.weapons.give('smg', 180);
   game.weapons.select('smg');
   game.input.state.fire = true;
   game.autopilot = { throttle: 0.35, steer: 0, handbrake: false };
   midMission(game, 'dita', 'Five stars?! Lose them before you come anywhere near my lock-up!');
-  game.cameraRig.state.zoom = 1.0;
-  game.cameraRig.state.pitch = 0.07;
+  game.cameraRig.state.zoom = 0.88;
+  game.cameraRig.state.pitch = 0.16;
   game.cameraRig.snap(Math.PI / 2 - 0.3);
   return 46;
 }

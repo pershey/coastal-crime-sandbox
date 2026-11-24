@@ -24,6 +24,42 @@ function addWheel(b, x, z, radius) {
   b.setTransform(null);
 }
 
+/** Racing stripes read dark on a bright paint and white on a dark one. */
+function stripeColorFor(paint) {
+  const r = (paint >> 16) & 255, g = (paint >> 8) & 255, bl = paint & 255;
+  return 0.299 * r + 0.587 * g + 0.114 * bl > 120 ? TRIM : 0xf4f4ee;
+}
+
+/**
+ * The sports car's wedge body: a low tub, a deck whose bonnet drops away to a front
+ * splitter, flared rear arches and dark side intakes. Returns where the flat deck ends.
+ */
+function buildSportsWedge(b, L, W, floor, bodyH, paint) {
+  const tubH = bodyH * 0.56, deckY = floor + tubH;
+  const bonnetZ = L * 0.27, tailZ = -L * 0.46;
+  b.prism(0, floor, 0, W, tubH, L, paint, { topX: W * 0.98 });
+  b.prism(0, deckY, 0, W * 0.98, bodyH - tubH, L, paint, { topX: W * 0.9, topZ: bonnetZ - tailZ, shiftZ: (bonnetZ + tailZ) / 2 });
+  b.box(0, floor - 0.07, L / 2 + 0.05, W * 1.02, 0.05, 0.3, TRIM);
+  for (const side of [-1, 1]) {
+    b.prism(side * (W / 2 - 0.02), floor + 0.2, -L * 0.31, 0.2, bodyH - 0.26, L * 0.25, paint, { topX: 0.1, topZ: L * 0.18 });
+    b.box(side * (W / 2), floor + 0.08, -L * 0.1, 0.05, tubH * 0.5, L * 0.12, TRIM);
+  }
+  return { deckY, bonnetZ, tailZ };
+}
+
+/** Twin stripes from the splitter over the bonnet, the roof and the tail deck. */
+function addRacingStripes(b, L, W, topY, wedge, roof, paint) {
+  const color = stripeColorFor(paint);
+  const lift = 0.014, width = W * 0.11;
+  for (const side of [-1, 1]) {
+    const x = side * W * 0.115, x0 = x - width / 2, x1 = x + width / 2;
+    b.quad([x0, wedge.deckY + lift, L / 2 + 0.005], [x1, wedge.deckY + lift, L / 2 + 0.005], [x1, topY + lift, wedge.bonnetZ], [x0, topY + lift, wedge.bonnetZ], color);
+    b.box(x, topY, (wedge.bonnetZ + roof.frontZ) / 2, width, lift, wedge.bonnetZ - roof.frontZ, color);
+    b.box(x, roof.y, roof.z, width, lift, roof.length, color);
+    b.box(x, topY, (roof.backZ + wedge.tailZ) / 2, width, lift, roof.backZ - wedge.tailZ, color);
+  }
+}
+
 /** The merged body geometry for a catalogue entry in one paint colour. Faces +z. */
 function buildBodyGeometry(spec, paint) {
   const b = new MeshBuilder();
@@ -42,7 +78,8 @@ function buildBodyGeometry(spec, paint) {
     b.box(0, floor + bodyH * 0.3, 0, W + 0.04, bodyH * 0.14, L * 0.7, second);
   } else {
     const bodyH = style === 'sports' ? 0.5 : style === 'pickup' ? 0.75 : 0.58;
-    b.prism(0, floor, 0, W, bodyH, L, paint, { topX: W * 0.94, topZ: L * 0.93, shiftZ: -L * 0.015 });
+    const wedge = style === 'sports' ? buildSportsWedge(b, L, W, floor, bodyH, paint) : null;
+    if (!wedge) b.prism(0, floor, 0, W, bodyH, L, paint, { topX: W * 0.94, topZ: L * 0.93, shiftZ: -L * 0.015 });
     // Dark sills, a grille and number plates break up the slab sides.
     b.box(0, floor - 0.04, 0, W + 0.03, 0.14, L * 0.6, TRIM);
     b.box(0, floor + 0.1, L / 2 - 0.02, W * 0.46, bodyH * 0.42, 0.08, TRIM);
@@ -79,6 +116,10 @@ function buildBodyGeometry(spec, paint) {
       b.box(W * 0.36, floor + bodyH, -L / 2 + 0.22, 0.06, 0.16, 0.1, TRIM);
       b.box(-W * 0.36, floor + bodyH, -L / 2 + 0.22, 0.06, 0.16, 0.1, TRIM);
     }
+    if (wedge) {
+      const roof = { y: floor + bodyH + cabinH + 0.05, z: cabinZ - cabinL * 0.04, length: cabinL * plan.top, frontZ: cabinZ + cabinL / 2, backZ: cabinZ - cabinL / 2 };
+      addRacingStripes(b, L, W, floor + bodyH, wedge, roof, paint);
+    }
     if (style === 'muscle') b.box(0, floor + bodyH, L * 0.22, 0.5, 0.1, L * 0.3, TRIM);
     if (spec.stripe) b.box(0, floor + bodyH * 0.35, 0, W + 0.04, bodyH * 0.3, L * 0.5, spec.stripe);
     if (spec.roofSign) b.box(0, H + 0.02, cabinZ, 0.9, 0.2, 0.34, spec.roofSign);
@@ -86,14 +127,18 @@ function buildBodyGeometry(spec, paint) {
   }
 
   // Bumpers, lights and wheels.
-  b.box(0, floor, L / 2, W * 0.98, 0.22, 0.16, TRIM);
-  b.box(0, floor, -L / 2, W * 0.98, 0.22, 0.16, TRIM);
+  // The sports car carries slim bumpers and slim lamps low on its nose.
+  const sporty = style === 'sports';
+  const bumperH = sporty ? 0.09 : 0.22;
+  b.box(0, floor, L / 2, W * 0.98, bumperH, 0.16, TRIM);
+  b.box(0, floor, -L / 2, W * 0.98, bumperH, 0.16, TRIM);
   // Lamps are a separate unlit mesh, so headlights and tail lights glow after dark.
   const lamps = new MeshBuilder();
-  const lightY = floor + (style === 'van' || style === 'truck' ? 0.5 : 0.3);
+  const lightY = floor + (style === 'van' || style === 'truck' ? 0.5 : sporty ? 0.11 : 0.3);
+  const lampH = sporty ? 0.12 : 0.16;
   for (const side of [-1, 1]) {
-    lamps.box(side * W * 0.34, lightY, L / 2 + 0.02, W * 0.22, 0.16, 0.08, 0xfff6cf, { bottom: true });
-    lamps.box(side * W * 0.34, lightY, -L / 2 - 0.02, W * 0.24, 0.14, 0.08, 0xff1f1f, { bottom: true });
+    lamps.box(side * W * 0.34, lightY, L / 2 + 0.02, W * 0.22, lampH, 0.08, 0xfff6cf, { bottom: true });
+    lamps.box(side * W * 0.34, lightY, -L / 2 - 0.02, W * 0.24, lampH - 0.02, 0.08, 0xff1f1f, { bottom: true });
   }
   if (style === 'sports' || style === 'muscle') lamps.box(0, lightY + 0.02, -L / 2 - 0.02, W * 0.4, 0.05, 0.06, 0xff1f1f);
   const axle = L * 0.31, track = W / 2 - 0.08;

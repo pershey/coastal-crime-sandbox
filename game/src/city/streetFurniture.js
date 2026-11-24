@@ -6,7 +6,8 @@ import { createRandom } from '../core/seededRandom.js';
 import { CITY } from './cityLayout.js';
 import { STOP_DISTANCE } from './roadNetwork.js';
 
-const ASPHALT = 0x3d4148;
+// Sun-bleached asphalt: light enough that cars and palm shadows read against it.
+const ASPHALT = 0x5c616b;
 const LINE_YELLOW = 0xf2c744;
 const LINE_WHITE = 0xf1f1ee;
 

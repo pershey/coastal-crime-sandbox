@@ -28,6 +28,17 @@ export function createHud(game) {
     el(id).classList.toggle(className, on);
   }
 
+  /** The weapon rack: every weapon the player owns by its number key, the one in hand lit. */
+  function weaponRack(heldKey) {
+    let rack = '';
+    for (const key of Object.keys(WEAPONS)) {
+      if (!game.weapons.state.owned[key]) continue;
+      const label = WEAPONS[key].name.split(' ')[0].toUpperCase();
+      rack += '<span class="' + (key === heldKey ? 'held' : 'holstered') + '"><i>' + WEAPONS[key].slot + '</i>' + label + '</span>';
+    }
+    return rack;
+  }
+
   /** A large centre-screen message: job done, knocked out, arrested. */
   function announce(title, detail = '', color = '#ffe14f', seconds = 4) {
     put('big-message-title', title);
@@ -94,6 +105,7 @@ export function createHud(game) {
     const weaponKey = game.weapons.state.current;
     put('weapon-name', WEAPONS[weaponKey].name.toUpperCase());
     put('weapon-ammo', WEAPONS[weaponKey].melee ? '' : String(game.weapons.state.ammo[weaponKey]));
+    put('weapon-rack', weaponRack(weaponKey), true);
     put('police-dispatch', policeResponse(), true);
 
     const p = game.player.position();

@@ -50,16 +50,21 @@ export function createPoliceHelicopter(game) {
   pool.visible = false;
   game.scene.add(beam, pool);
 
-  const state = { active: false, x: 0, y: 120, z: 0, heading: 0, orbit: 0, cooldown: 3, spotX: 0, spotZ: 0 };
+  const state = { active: false, x: 0, y: 120, z: 0, heading: 0, orbit: 0, radius: ORBIT_RADIUS, height: CRUISE_HEIGHT, cooldown: 3, spotX: 0, spotZ: 0 };
 
-  /** Put the helicopter straight on station (screenshot scenes and mission set-pieces). */
-  function placeOnStation(orbitAngle = 0.6) {
+  /**
+   * Put the helicopter straight on station (screenshot scenes and mission set-pieces).
+   * A wider, lower station than the default has it trail the chase down the street.
+   */
+  function placeOnStation(orbitAngle = 0.6, radius = ORBIT_RADIUS, height = CRUISE_HEIGHT) {
     const p = game.player.position();
     state.active = true;
     state.orbit = orbitAngle;
-    state.x = p.x + Math.sin(orbitAngle) * ORBIT_RADIUS;
-    state.z = p.z + Math.cos(orbitAngle) * ORBIT_RADIUS;
-    state.y = CRUISE_HEIGHT;
+    state.radius = radius;
+    state.height = height;
+    state.x = p.x + Math.sin(orbitAngle) * radius;
+    state.z = p.z + Math.cos(orbitAngle) * radius;
+    state.y = height;
     state.spotX = p.x;
     state.spotZ = p.z;
   }
@@ -84,6 +89,8 @@ export function createPoliceHelicopter(game) {
       state.y = 90;
       state.spotX = state.x;
       state.spotZ = state.z;
+      state.radius = ORBIT_RADIUS;
+      state.height = CRUISE_HEIGHT;
       game.events.emit('helicopterInbound', {});
     }
     if (!state.active) {
@@ -98,9 +105,9 @@ export function createPoliceHelicopter(game) {
     let goalX, goalZ, goalY;
     if (stars >= 3) {
       state.orbit += dt * 0.35;
-      goalX = focus.x + Math.sin(state.orbit) * ORBIT_RADIUS;
-      goalZ = focus.z + Math.cos(state.orbit) * ORBIT_RADIUS;
-      goalY = CRUISE_HEIGHT;
+      goalX = focus.x + Math.sin(state.orbit) * state.radius;
+      goalZ = focus.z + Math.cos(state.orbit) * state.radius;
+      goalY = state.height;
     } else {
       goalX = state.x - 60;
       goalZ = state.z - 60;
